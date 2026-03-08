@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Легенды Дракономании</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(145deg, #0a0f1e, #1a1f2e);
+            color: #fff;
+        }
+
+        /* Главный контейнер */
+        .app {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 16px;
+            position: relative;
+            min-height: 100vh;
+            background: linear-gradient(165deg, #0f172a 0%, #1e293b 100%);
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        }
+
+        /* Шапка */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 2px solid #ffd70033;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px #ff8c00;
+        }
+
+        .resources {
+            display: flex;
+            gap: 20px;
+        }
+
+        .resource {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(0,0,0,0.5);
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: 1px solid #ffd70033;
+        }
+
+        .gold {
+            color: #ffd700;
+        }
+
+        .food {
+            color: #50c878;
+        }
+
+        /* Прогресс захвата */
+        .invasion-progress {
+            background: linear-gradient(145deg, #2d1a1a, #3d2a2a);
+            border-radius: 30px;
+            padding: 16px;
+            margin-bottom: 20px;
+            border: 1px solid #ff4444;
+            box-shadow: 0 0 20px #ff000033;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .viking-icon {
+            color: #ff6b6b;
+            font-size: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #2d1a1a;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #ff4444;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff4444, #ff8844);
+            transition: width 0.3s;
+            width: 0%;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        /* Конюшня драконов */
+        .stable {
+            background: rgba(0,0,0,0.3);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(5px);
+            border: 1px solid #ffd70033;
+        }
+
+        .section-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #ffd700;
+        }
+
+        .dragons-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .dragon-card {
+            background: linear-gradient(145deg, #2a2f3f, #1a1f2f);
+            border-radius: 16px;
+            padding: 12px;
+            border: 1px solid #ffd70033;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dragon-card.selected {
+            border: 2px solid #ffd700;
+            box-shadow: 0 0 20px #ffd700;
+            transform: scale(1.02);
+        }
+
+        .dragon-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .dragon-card:hover::before {
+            opacity: 1;
+        }
+
+        .dragon-emoji {
+            font-size: 48px;
+            text-align: center;
+            filter: drop-shadow(0 0 10px currentColor);
+            margin-bottom: 8px;
+        }
+
+        .dragon-name {
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .dragon-stats {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .stat-bar {
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+            margin: 4px 0;
+            overflow: hidden;
+        }
+
+        .stat-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50, #8bc34a);
+            width: 0%;
+        }
+
+        .dragon-level {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #ffd700;
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        /* Инкубатор */
+        .incubator {
+            background: rgba(255,215,0,0.1);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 20px;
+            border: 1px dashed #ffd700;
+        }
+
+        .egg-timer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .egg-progress {
+            flex: 1;
+            height: 10px;
+            background: #333;
+            border-radius: 5px;
+            margin: 0 10px;
+            overflow: hidden;
+        }
+
+        .egg-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffd700, #ffaa00);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        /* Арена */
+        .arena {
+            background: linear-gradient(145deg, #2d1f1f, #1f1f2d);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #ff4444;
+        }
+
+        .battle-scene {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .battle-dragon, .battle-viking {
+            text-align: center;
+            flex: 1;
+        }
+
+        .battle-emoji {
+            font-size: 80px;
+            animation: float 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px currentColor);
+        }
+
+        .vs {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff4444;
+            text-shadow: 0 0 10px #ff0000;
+            animation: pulse 1.5s infinite;
+        }
+
+        .battle-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+
+        .health-bar {
+            width: 100%;
+            height: 8px;
+            background: #333;
+            border-radius: 4px;
+            margin: 5px 0;
+            overflow: hidden;
+        }
+
+        .health-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50, #ff4444);
+            width: 100%;
+            transition: width 0.3s;
+        }
+
+        /* Кнопки */
+        .button {
+            background: linear-gradient(145deg, #ffd700, #ff8c00);
+            border: none;
+            color: #000;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #ffd700;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 0 #b86f00;
+        }
+
+        .button:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .button-small {
+            padding: 8px 16px;
+            font-size: 14px;
+            width: auto;
+        }
+
+        /* Анимации */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .shake {
+            animation: shake 0.3s ease-in-out;
+        }
+
+        /* Уведомления */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.9);
+            color: #ffd700;
+            padding: 12px 24px;
+            border-radius: 30px;
+            border: 1px solid #ffd700;
+            box-shadow: 0 0 20px #ffd700;
+            z-index: 1000;
+            display: none;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        /* Магазин */
+        .shop {
+            background: rgba(0,0,0,0.3);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .shop-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #ffd70033;
+        }
+
+        .shop-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Шапка с ресурсами -->
+        <div class="header">
+            <div class="title">🐉 Драконландия</div>
+            <div class="resources">
+                <div class="resource">
+                    <span class="gold">💰</span>
+                    <span id="gold">1000</span>
+                </div>
+                <div class="resource">
+                    <span class="food">🍖</span>
+                    <span id="food">500</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Прогресс вторжения -->
+        <div class="invasion-progress">
+            <div class="progress-header">
+                <span>⚔️ Вторжение викингов</span>
+                <span class="viking-icon" id="vikingsLeft">👨 100</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="invasionProgress" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Конюшня драконов -->
+        <div class="stable">
+            <div class="section-title">
+                <span>🏰</span> Твои драконы
+                <span style="margin-left: auto; font-size: 14px;" id="dragonCount">1/6</span>
+            </div>
+            <div class="dragons-grid" id="dragonsGrid">
+                <!-- Сюда будут добавляться драконы через JS -->
+            </div>
+        </div>
+
+        <!-- Инкубатор -->
+        <div class="incubator" id="incubator">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span>🥚 Инкубатор</span>
+                <span id="eggTimer">Готово!</span>
+            </div>
+            <div class="egg-timer">
+                <span>🐣</span>
+                <div class="egg-progress">
+                    <div class="egg-fill" id="eggProgress" style="width: 0%"></div>
+                </div>
+                <span>🐉</span>
+            </div>
+            <button class="button button-small" id="hatchBtn" style="margin-top: 10px;" onclick="hatchEgg()">Вылупить яйцо (100💰)</button>
+        </div>
+
+        <!-- Арена -->
+        <div class="arena">
+            <div class="section-title">⚔️ Арена</div>
+            <div class="battle-scene">
+                <div class="battle-dragon">
+                    <div class="battle-emoji" id="battleDragonEmoji">🐉</div>
+                    <div>Уровень <span id="battleDragonLevel">1</span></div>
+                </div>
+                <div class="vs">VS</div>
+                <div class="battle-viking">
+                    <div class="battle-emoji" id="battleVikingEmoji">👨</div>
+                    <div>Сила <span id="vikingPower">10</span></div>
+                </div>
+            </div>
+            <div class="battle-stats">
+                <div>
+                    <div>❤️ Здоровье</div>
+                    <div class="health-bar">
+                        <div class="health-fill" id="dragonHealth" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div>⚔️ Атака: <span id="dragonAttack">10</span></div>
+                </div>
+            </div>
+            <button class="button" id="battleBtn" onclick="startBattle()">Начать битву</button>
+        </div>
+
+        <!-- Магазин -->
+        <div class="shop">
+            <div class="section-title">🏪 Лавка</div>
+            <div class="shop-item">
+                <span>🍖 Еда (тренировка)</span>
+                <span>50💰</span>
+                <button class="button-small" onclick="buyFood()">Купить</button>
+            </div>
+            <div class="shop-item">
+                <span>🥚 Яйцо дракона</span>
+                <span>100💰</span>
+                <button class="button-small" onclick="buyEgg()">Купить</button>
+            </div>
+            <div class="shop-item">
+                <span>⚔️ Усиление атаки</span>
+                <span>200💰</span>
+                <button class="button-small" onclick="buyAttackBoost()">Купить</button>
+            </div>
+        </div>
+
+        <!-- Уведомления -->
+        <div class="toast" id="toast"></div>
+    </div>
+
+    <script>
+        // Состояние игры
+        let gameState = {
+            gold: 1000,
+            food: 500,
+            dragons: [
+                { id: 1, name: 'Огненный', emoji: '🔥', level: 1, exp: 0, attack: 10, health: 100, maxHealth: 100 },
+                { id: 2, name: 'Ледяной', emoji: '❄️', level: 1, exp: 0, attack: 8, health: 120, maxHealth: 120 }
+            ],
+            maxDragons: 6,
+            selectedDragon: 0,
+            invasionProgress: 0,
+            vikinsCount: 100,
+            egg: { hatching: false, progress: 0, timeLeft: 0 },
+            battleInProgress: false,
+            vikingPower: 10
+        };
+
+        // Элементы DOM
+        const elements = {
+            gold: document.getElementById('gold'),
+            food: document.getElementById('food'),
+            dragonsGrid: document.getElementById('dragonsGrid'),
+            vikingsLeft: document.getElementById('vikingsLeft'),
+            invasionProgress: document.getElementById('invasionProgress'),
+            dragonCount: document.getElementById('dragonCount'),
+            battleDragonEmoji: document.getElementById('battleDragonEmoji'),
+            battleDragonLevel: document.getElementById('battleDragonLevel'),
+            vikingPower: document.getElementById('vikingPower'),
+            dragonHealth: document.getElementById('dragonHealth'),
+            dragonAttack: document.getElementById('dragonAttack'),
+            battleBtn: document.getElementById('battleBtn'),
+            toast: document.getElementById('toast'),
+            eggProgress: document.getElementById('eggProgress'),
+            eggTimer: document.getElementById('eggTimer'),
+            hatchBtn: document.getElementById('hatchBtn')
+        };
+
+        // Обновление интерфейса
+        function updateUI() {
+            elements.gold.textContent = gameState.gold;
+            elements.food.textContent = gameState.food;
+            elements.vikingsLeft.textContent = `👨 ${gameState.vikinsCount}`;
+            elements.invasionProgress.style.width = `${(100 - gameState.vikinsCount)}%`;
+            elements.dragonCount.textContent = `${gameState.dragons.length}/${gameState.maxDragons}`;
+
+            // Обновление сетки драконов
+            renderDragons();
+
+            // Обновление информации о выбранном драконе
+            if (gameState.dragons.length > 0) {
+                const dragon = gameState.dragons[gameState.selectedDragon];
+                elements.battleDragonEmoji.textContent = dragon.emoji;
+                elements.battleDragonLevel.textContent = dragon.level;
+                elements.dragonAttack.textContent = dragon.attack;
+                elements.dragonHealth.style.width = `${(dragon.health / dragon.maxHealth) * 100}%`;
+            }
+
+            // Обновление информации о викинге
+            elements.vikingPower.textContent = gameState.vikingPower;
+
+            // Обновление инкубатора
+            updateIncubator();
+
+            // Проверка победы
+            if (gameState.vikinsCount <= 0) {
+                showToast('🎉 Победа! Викинги изгнаны из Драконландии!');
+            }
+        }
+
+        // Отрисовка драконов
+        function renderDragons() {
+            elements.dragonsGrid.innerHTML = '';
+            gameState.dragons.forEach((dragon, index) => {
+                const card = document.createElement('div');
+                card.className = `dragon-card ${index === gameState.selectedDragon ? 'selected' : ''}`;
+                card.onclick = () => selectDragon(index);
+                
+                card.innerHTML = `
+                    <div class="dragon-level">${dragon.level}</div>
+                    <div class="dragon-emoji">${dragon.emoji}</div>
+                    <div class="dragon-name">${dragon.name}</div>
+                    <div class="dragon-stats">
+                        <div>⚔️ ${dragon.attack}</div>
+                        <div>❤️ ${dragon.health}/${dragon.maxHealth}</div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: ${(dragon.exp % 100)}%"></div>
+                        </div>
+                        <div>✨ ${dragon.exp}/100</div>
+                    </div>
+                `;
+                elements.dragonsGrid.appendChild(card);
+            });
+        }
+
+        // Выбор дракона
+        function selectDragon(index) {
+            gameState.selectedDragon = index;
+            updateUI();
+        }
+
+        // Покупка еды
+        function buyFood() {
+            if (gameState.gold >= 50) {
+                gameState.gold -= 50;
+                gameState.food += 50;
+                showToast('🍖 Куплена еда для тренировок!');
+                updateUI();
+            } else {
+                showToast('Недостаточно золота!');
+            }
+        }
+
+        // Покупка яйца
+        function buyEgg() {
+            if (gameState.gold >= 100 && gameState.dragons.length < gameState.maxDragons) {
+                gameState.gold -= 100;
+                startHatching();
+                showToast('🥚 Яйцо помещено в инкубатор!');
+                updateUI();
+            } else if (gameState.dragons.length >= gameState.maxDragons) {
+                showToast('Достигнут максимум драконов!');
+            } else {
+                showToast('Недостаточно золота!');
+            }
+        }
+
+        // Покупка усиления атаки
+        function buyAttackBoost() {
+            if (gameState.gold >= 200 && gameState.dragons.length > 0) {
+                gameState.gold -= 200;
+                const dragon = gameState.dragons[gameState.selectedDragon];
+                dragon.attack += 5;
+                showToast(`⚔️ Атака ${dragon.name} увеличена!`);
+                updateUI();
+            } else {
+                showToast('Недостаточно золота или нет драконов!');
+            }
+        }
+
+        // Начало высиживания
+        function startHatching() {
+            gameState.egg = {
+                hatching: true,
+                progress: 0,
+                timeLeft: 60 // 60 секунд
+            };
+            
+            const eggInterval = setInterval(() => {
+                if (gameState.egg.hatching) {
+                    gameState.egg.progress += 1;
+                    gameState.egg.timeLeft -= 1;
+                    
+                    updateIncubator();
+                    
+                    if (gameState.egg.timeLeft <= 0) {
+                        clearInterval(eggInterval);
+                        completeHatching();
+                    }
+                } else {
+                    clearInterval(eggInterval);
+                }
+            }, 1000);
+        }
+
+        // Обновление инкубатора
+        function updateIncubator() {
+            if (gameState.egg.hatching) {
+                elements.eggProgress.style.width = `${gameState.egg.progress}%`;
+                elements.eggTimer.textContent = `${Math.floor(gameState.egg.timeLeft / 60)}:${(gameState.egg.timeLeft % 60).toString().padStart(2, '0')}`;
+                elements.hatchBtn.disabled = true;
+            } else {
+                elements.eggProgress.style.width = '0%';
+                elements.eggTimer.textContent = 'Готово!';
+                elements.hatchBtn.disabled = false;
+            }
+        }
+
+        // Завершение высиживания
+        function completeHatching() {
+            gameState.egg.hatching = false;
+            showToast('🥚 Яйцо готово к вылуплению! Нажмите кнопку!');
+            updateUI();
+        }
+
+        // Вылупление яйца
+        function hatchEgg() {
+            if (gameState.gold >= 100 && !gameState.egg.hatching && gameState.dragons.length < gameState.maxDragons) {
+                gameState.gold -= 100;
+                
+                // Создание нового дракона
+                const dragonTypes = [
+                    { name: 'Пламенный', emoji: '🔥', attack: 10, health: 100 },
+                    { name: 'Морозный', emoji: '❄️', attack: 8, health: 120 },
+                    { name: 'Грозовой', emoji: '⚡', attack: 15, health: 80 },
+                    { name: 'Земляной', emoji: '⛰️', attack: 12, health: 110 }
+                ];
+                
+                const type = dragonTypes[Math.floor(Math.random() * dragonTypes.length)];
+                const newDragon = {
+                    id: Date.now(),
+                    name: type.name,
+                    emoji: type.emoji,
+                    level: 1,
+                    exp: 0,
+                    attack: type.attack,
+                    health: type.health,
+                    maxHealth: type.health
+                };
+                
+                gameState.dragons.push(newDragon);
+                showToast(`🐉 Появился ${newDragon.name} дракон!`);
+                updateUI();
+            } else if (gameState.dragons.length >= gameState.maxDragons) {
+                showToast('Достигнут максимум драконов!');
+            }
+        }
+
+        // Тренировка дракона
+        function trainDragon() {
+            if (gameState.food >= 20 && gameState.dragons.length > 0) {
+                gameState.food -= 20;
+                const dragon = gameState.dragons[gameState.selectedDragon];
+                dragon.exp += 10;
+                
+                // Проверка повышения уровня
+                if (dragon.exp >= 100) {
+                    dragon.level++;
+                    dragon.exp = 0;
+                    dragon.attack += 5;
+                    dragon.maxHealth += 20;
+                    dragon.health = dragon.maxHealth;
+                    showToast(`✨ ${dragon.name} достиг уровня ${dragon.level}!`);
+                }
+                
+                showToast(`🏋️ ${dragon.name} тренируется!`);
+                updateUI();
+            } else {
+                showToast('Недостаточно еды или нет драконов!');
+            }
+        }
+
+        // Начало битвы
+        function startBattle() {
+            if (gameState.battleInProgress || gameState.dragons.length === 0) return;
+            
+            const dragon = gameState.dragons[gameState.selectedDragon];
+            if (dragon.health <= 0) {
+                showToast('Дракон слишком слаб для битвы!');
+                return;
+            }
+            
+            gameState.battleInProgress = true;
+            elements.battleBtn.disabled = true;
+            
+            // Анимация битвы
+            const battleInterval = setInterval(() => {
+                // Урон дракона
+                const dragonDamage = Math.floor(Math.random() * dragon.attack) + 5;
+                gameState.vikingPower -= dragonDamage;
+                
+                // Урон викинга
+                const vikingDamage = Math.floor(Math.random() * gameState.vikingPower) + 3;
+                dragon.health = Math.max(0, dragon.health - vikingDamage);
+                
+                // Визуальные эффекты
+                document.querySelector('.battle-dragon .battle-emoji').style.animation = 'shake 0.3s';
+                document.querySelector('.battle-viking .battle-emoji').style.animation = 'shake 0.3s';
+                
+                setTimeout(() => {
+                    document.querySelector('.battle-dragon .battle-emoji').style.animation = '';
+                    document.querySelector('.battle-viking .battle-emoji').style.animation = '';
+                }, 300);
+                
+                updateUI();
+                
+                // Проверка окончания битвы
+                if (gameState.vikingPower <= 0 || dragon.health <= 0) {
+                    clearInterval(battleInterval);
+                    endBattle();
+                }
+            }, 1000);
+        }
+
+        // Завершение битвы
+        function endBattle() {
+            const dragon = gameState.dragons[gameState.selectedDragon];
+            
+            if (gameState.vikingPower <= 0) {
+                // Победа
+                gameState.vikinsCount = Math.max(0, gameState.vikinsCount - 1);
+                const reward = 50 + Math.floor(Math.random() * 50);
+                gameState.gold += reward;
+                dragon.exp += 20;
+                
+                if (dragon.exp >= 100) {
+                    dragon.level++;
+                    dragon.exp = 0;
+                    dragon.attack += 5;
+                    dragon.maxHealth += 20;
+                }
+                
+                dragon.health = Math.min(dragon.health + 30, dragon.maxHealth);
+                gameState.vikingPower = 10 + Math.floor(Math.random() * 10);
+                
+                showToast(`🎉 Победа! Получено ${reward} золота!`);
+            } else {
+                // Поражение
+                showToast('💔 Дракон потерпел поражение...');
+                dragon.health = Math.floor(dragon.maxHealth * 0.3); // Восстановление 30%
+            }
+            
+            gameState.battleInProgress = false;
+            elements.battleBtn.disabled = false;
+            updateUI();
+        }
+
+        // Показать уведомление
+        function showToast(message) {
+            elements.toast.textContent = message;
+            elements.toast.style.display = 'block';
+            
+            setTimeout(() => {
+                elements.toast.style.display = 'none';
+            }, 3000);
+        }
+
+        // Сохранение игры
+        function saveGame() {
+            localStorage.setItem('dragonGame', JSON.stringify(gameState));
+        }
+
+        // Загрузка игры
+        function loadGame() {
+            const saved = localStorage.getItem('dragonGame');
+            if (saved) {
+                gameState = JSON.parse(saved);
+            }
+        }
+
+        // Добавляем кнопку тренировки
+        const stableSection = document.querySelector('.stable');
+        const trainButton = document.createElement('button');
+        trainButton.className = 'button button-small';
+        trainButton.textContent = '🏋️ Тренировать (20🍖)';
+        trainButton.onclick = trainDragon;
+        trainButton.style.marginTop = '10px';
+        stableSection.appendChild(trainButton);
+
+        // Инициализация
+        loadGame();
+        updateUI();
+
+        // Автосохранение каждые 30 секунд
+        setInterval(saveGame, 30000);
+
+        // Восстановление здоровья со временем
+        setInterval(() => {
+            gameState.dragons.forEach(dragon => {
+                if (dragon.health < dragon.maxHealth) {
+                    dragon.health = Math.min(dragon.health + 1, dragon.maxHealth);
+                }
+            });
+            updateUI();
+        }, 10000);
+    </script>
+</body>
+</html>
